@@ -1,7 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
 import "./styles/index.css";
 import App from "./components/App";
+import { AUTH_TOKEN } from "./constants";
 
 // imports from Apollo Client
 import {
@@ -18,14 +20,15 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem(AUTH_TOKEN);
   return {
     headers: {
       ...headers,
-      authorization:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTYzNjM0NjU1Nn0.3z3ywji-JBUfCb9TIgqT5jo7LWtFnC6Uiql1GTIg_iU",
+      authorization: token ? `Bearer ${token}` : "",
     },
   };
 });
+
 // create graphql client
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
@@ -34,8 +37,10 @@ const client = new ApolloClient({
 
 // wrap application in higher-order component ApolloProvider with client as prop
 ReactDOM.render(
-  <ApolloProvider client={client}>
-    <App />
-  </ApolloProvider>,
+  <BrowserRouter>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
+  </BrowserRouter>,
   document.getElementById("root")
 );
